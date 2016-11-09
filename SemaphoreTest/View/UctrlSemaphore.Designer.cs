@@ -115,6 +115,7 @@
             0,
             0});
             this.numSemaphoreCapacity.Name = "numSemaphoreCapacity";
+            this.numSemaphoreCapacity.RightToLeft = System.Windows.Forms.RightToLeft.No;
             this.numSemaphoreCapacity.Size = new System.Drawing.Size(120, 20);
             this.numSemaphoreCapacity.TabIndex = 7;
             this.numSemaphoreCapacity.Value = new decimal(new int[] {

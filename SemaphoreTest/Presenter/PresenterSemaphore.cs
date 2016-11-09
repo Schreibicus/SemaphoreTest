@@ -3,17 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SemaphoreTest.View;
 
 namespace SemaphoreTest.Presenter
 {
     public class PresenterSemaphore : IPresenterSemaphore
     {
-        public void ShowView()
-        {
-        }
+        IViewSemaphore _view;
 
-        public void HideView()
-        {
-        }
+        public void ShowView() { _view.Show(); }
+        public void HideView() { _view.Hide(); }
     }
 }

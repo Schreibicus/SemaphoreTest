@@ -9,7 +9,6 @@ namespace SemaphoreTest.Model
         private readonly Semaphore _semaphore;
         private readonly Thread _thread;
         
-        
         private string _displayString;
         public string DisplayString
         {
@@ -19,6 +18,7 @@ namespace SemaphoreTest.Model
 
         public string Name { get { return _thread.Name; } }
         public bool IsRunning { get; set; }
+        public event Action<string> ThreadUnlocked;
 
 
         public MyTimedThread(Semaphore semaphore, string name)
@@ -35,12 +35,18 @@ namespace SemaphoreTest.Model
             DisplayString = $"Thread {Name} --> Waiting";
         }
 
+        public void Abort()
+        {
+            _thread.Abort();
+        }
+
         private void MainThreadLoop()
         {
             while (IsRunning) {
                 if (!_semaphore.WaitOne(1500)) continue;
 
                 try {
+                    ThreadUnlocked?.Invoke(Name);
                     DisplayString = $"Thread {Name} --> Running";
                     while (IsRunning) {
                         //add timer logic
