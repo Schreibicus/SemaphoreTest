@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using SemaphoreTest.Presenter;
 using SemaphoreTest.View;
 
 namespace SemaphoreTest
@@ -17,7 +18,9 @@ namespace SemaphoreTest
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new FormMain());
+
+            PresenterMain presenterMain = new PresenterMain(new FormMain());
+            presenterMain.Run();
         }
     }
 }
