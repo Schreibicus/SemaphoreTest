@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("SemaphoreTest")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("Schreibicus")]
 [assembly: AssemblyProduct("SemaphoreTest")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2016")]
+[assembly: AssemblyCopyright("Copyright © Schreibicus")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
