@@ -32,7 +32,7 @@ namespace SemaphoreTest.View
             lbNewThreads.DoubleClick +=
                 (sender, args) => ThreadStartRequested?.Invoke(lbNewThreads.SelectedValue as string);
             lbWorkingThreads.DoubleClick +=
-                (sender, args) => ThreadStopRequested?.Invoke(lbNewThreads.SelectedValue as string);
+                (sender, args) => ThreadStopRequested?.Invoke(lbWorkingThreads.SelectedValue as string);
 
             _bsNewThreads = new BindingSource();
             _bsWaitingThreads = new BindingSource();

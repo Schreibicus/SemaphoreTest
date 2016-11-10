@@ -18,17 +18,15 @@ namespace SemaphoreTest.Model
 
         public string Name { get { return _thread.Name; } }
         public bool IsRunning { get; set; }
-        public event Action<string> ThreadUnlocked;
+        public event Action<string> ThreadEnteredWorkingArea;
+        public event Action<string> ThreadExitedWorkingArea;
+
 
 
         public MyTimedThread(Semaphore semaphore, string name)
         {
             _semaphore = semaphore;
-            _thread = new Thread(MainThreadLoop)
-            {
-                Name = name,
-                IsBackground = true
-            };
+            _thread = new Thread(ThreadWorkingArea) { Name = name, IsBackground = true };
             IsRunning = false;
             DisplayString = $"Thread {name} --> New";
         }
@@ -37,34 +35,31 @@ namespace SemaphoreTest.Model
         {
             _thread.Start();
             DisplayString = $"Thread {Name} --> Waiting";
+            IsRunning = true;
         }
 
-        public void Abort()
+
+        private void ThreadWorkingArea()
         {
-            _semaphore.Release();
-            _thread.Abort();
-        }
+            try {
+                _semaphore.WaitOne();
+                ThreadEnteredWorkingArea?.Invoke(Name);
 
-        private void MainThreadLoop()
-        {
-            bool stop = false;
+                int workingTime = 0;
+                var timer = new Timer(neverUsed => workingTime++, null, 0, 1000);
 
-            while (!stop) {
-                if (!_semaphore.WaitOne(1500)) continue;
-
-                try {
-                    ThreadUnlocked?.Invoke(Name);
-                    DisplayString = $"Thread {Name} --> Running";
-                    while (IsRunning) {
-                        //add timer logic
-                        Thread.Sleep(2000);
-                    }              
+                while (IsRunning) {
+                    DisplayString = $"Thread {Name} --> Running {workingTime}";
+                    Thread.Sleep(500);             
                 }
-                finally {
-                    stop = true;
-                    _semaphore.Release();
-                }
+                
             }
+            finally {
+                ThreadExitedWorkingArea?.Invoke(Name);
+                _semaphore.Release();
+            }                  
         }
+
+        
     }
 }

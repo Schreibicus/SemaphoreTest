@@ -25,7 +25,7 @@ namespace SemaphoreTest.Presenter
 
         public PresenterSemaphore(IViewSemaphore view)
         {
-            _semaphore = new Semaphore(100, 100, "MainSemaphore");
+            _semaphore = new Semaphore(1, 100, "MainSemaphore");
 
             _newThreads = new BindingList<MyTimedThread>();
             _waitingThreads = new BindingList<MyTimedThread>();
@@ -46,7 +46,10 @@ namespace SemaphoreTest.Presenter
         private void AddThread()
         {
             MyTimedThread newThread = new MyTimedThread(_semaphore, _newThreadNumber.ToString());
-            newThread.ThreadUnlocked += OnThreadUnlocked;
+            newThread.ThreadEnteredWorkingArea += OnThreadEnteredWorkingArea;
+
+            newThread.ThreadExitedWorkingArea += OnThreadExitedWorkingArea;
+
             _newThreads.Add(newThread);
             _newThreadNumber++;
         }
@@ -56,6 +59,7 @@ namespace SemaphoreTest.Presenter
         {
             var selectedThread = _newThreads.FirstOrDefault(thrd => thrd.Name == name);
             if (selectedThread == null) { return; }
+
             _newThreads.Remove(selectedThread);
             _waitingThreads.Add(selectedThread);
             selectedThread.IsRunning = true;
@@ -63,12 +67,21 @@ namespace SemaphoreTest.Presenter
         }
 
 
-        private void OnThreadUnlocked(string name)
+        private void OnThreadEnteredWorkingArea(string name)
         {
             var selectedThread = _waitingThreads.FirstOrDefault(thrd => thrd.Name == name);
             if (selectedThread == null) { return; }
-            _waitingThreads.Remove(selectedThread);
+
             _workingThreads.Add(selectedThread);
+            _waitingThreads.Remove(selectedThread);
+            
+        }
+
+        private void OnThreadExitedWorkingArea(string name)
+        {
+            var selectedThread = _workingThreads.FirstOrDefault(thrd => thrd.Name == name);
+            if (selectedThread == null) { return; }
+            _workingThreads.Remove(selectedThread);
         }
 
 
@@ -76,13 +89,11 @@ namespace SemaphoreTest.Presenter
         {
             var selectedThread = _workingThreads.FirstOrDefault(thrd => thrd.Name == name);
             if (selectedThread == null) { return; }
-            _workingThreads.Remove(selectedThread);
             selectedThread.IsRunning = false;
-            selectedThread.Abort();
         }
 
 
-        private void ChangeSemaphoreCapcity(int capacity)
+        private void ChangeSemaphoreCapcity(int requestedCapacity)
         {
             
         }
