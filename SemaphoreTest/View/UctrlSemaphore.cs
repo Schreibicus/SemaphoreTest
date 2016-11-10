@@ -30,9 +30,9 @@ namespace SemaphoreTest.View
             numSemaphoreCapacity.ValueChanged +=
                 (sender, args) => SemaphoreCapacityRequested?.Invoke((int) numSemaphoreCapacity.Value);
             lbNewThreads.DoubleClick +=
-                (sender, args) => ThreadStartRequested?.Invoke((lbNewThreads.SelectedValue as MyTimedThread)?.Name);
+                (sender, args) => ThreadStartRequested?.Invoke(lbNewThreads.SelectedValue as string);
             lbWorkingThreads.DoubleClick +=
-                (sender, args) => ThreadStopRequested?.Invoke((lbWorkingThreads.SelectedValue as MyTimedThread)?.Name);
+                (sender, args) => ThreadStopRequested?.Invoke(lbNewThreads.SelectedValue as string);
 
             _bsNewThreads = new BindingSource();
             _bsWaitingThreads = new BindingSource();
@@ -43,7 +43,7 @@ namespace SemaphoreTest.View
         public void SetNewThreadsDataSource(BindingList<MyTimedThread> dataSource)
         {
             _bsNewThreads.DataSource = dataSource;
-            lbNewThreads.DisplayMember = "Name";
+            lbNewThreads.DisplayMember = "DisplayString";
             lbNewThreads.ValueMember = "Name";
             lbNewThreads.DataSource = _bsNewThreads;
         }
@@ -51,7 +51,7 @@ namespace SemaphoreTest.View
         public void SetWaitingThreadsDataSource(BindingList<MyTimedThread> dataSource)
         {
             _bsWaitingThreads.DataSource = dataSource;
-            lbWaitingThreads.DisplayMember = "Name";
+            lbWaitingThreads.DisplayMember = "DisplayString";
             lbWaitingThreads.ValueMember = "Name";
             lbWaitingThreads.DataSource = _bsWaitingThreads;
         }
@@ -59,7 +59,7 @@ namespace SemaphoreTest.View
         public void SetWorkingThreadsDataSource(BindingList<MyTimedThread> dataSource)
         {
             _bsWorkingThreads.DataSource = dataSource;
-            lbWorkingThreads.DisplayMember = "Name";
+            lbWorkingThreads.DisplayMember = "DisplayString";
             lbWorkingThreads.ValueMember = "Name";
             lbWorkingThreads.DataSource = _bsWorkingThreads;
         }

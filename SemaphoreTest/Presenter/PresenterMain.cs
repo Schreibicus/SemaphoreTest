@@ -35,9 +35,15 @@ namespace SemaphoreTest.Presenter
         }
 
         private void ShowSemaphoreScreen()
-        {}
+        {
+            _presenterSemaphore?.ShowView();
+        }
 
         private void InitSemaphoreScreen()
-        {}
+        {
+            if (_presenterSemaphore == null) {
+                _presenterSemaphore = new PresenterSemaphore(_viewMain.GetSemaphoreView());
+            }
+        }
     }
 }

@@ -21,6 +21,5 @@ namespace SemaphoreTest.View
         void SetNewThreadsDataSource(BindingList<MyTimedThread> dataSource);
         void SetWaitingThreadsDataSource(BindingList<MyTimedThread> dataSource);
         void SetWorkingThreadsDataSource(BindingList<MyTimedThread> dataSource);
-
     }
 }

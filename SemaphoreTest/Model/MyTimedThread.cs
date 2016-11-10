@@ -24,7 +24,11 @@ namespace SemaphoreTest.Model
         public MyTimedThread(Semaphore semaphore, string name)
         {
             _semaphore = semaphore;
-            _thread = new Thread(MainThreadLoop) {Name = name};
+            _thread = new Thread(MainThreadLoop)
+            {
+                Name = name,
+                IsBackground = true
+            };
             IsRunning = false;
             DisplayString = $"Thread {name} --> New";
         }
@@ -37,12 +41,15 @@ namespace SemaphoreTest.Model
 
         public void Abort()
         {
+            _semaphore.Release();
             _thread.Abort();
         }
 
         private void MainThreadLoop()
         {
-            while (IsRunning) {
+            bool stop = false;
+
+            while (!stop) {
                 if (!_semaphore.WaitOne(1500)) continue;
 
                 try {
@@ -54,12 +61,10 @@ namespace SemaphoreTest.Model
                     }              
                 }
                 finally {
+                    stop = true;
                     _semaphore.Release();
                 }
             }
         }
-
-
-
     }
 }
