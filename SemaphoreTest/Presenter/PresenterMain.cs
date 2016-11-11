@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Autofac;
 using SemaphoreTest.View;
+using SemaphoreTest;
 
 namespace SemaphoreTest.Presenter
 {
@@ -42,7 +44,10 @@ namespace SemaphoreTest.Presenter
         private void InitSemaphoreScreen()
         {
             if (_presenterSemaphore == null) {
-                _presenterSemaphore = new PresenterSemaphore(_viewMain.GetSemaphoreView());
+                using (var scope = Program.Container.BeginLifetimeScope()) {
+                    _presenterSemaphore = scope.Resolve<IPresenterSemaphore>(
+                        new NamedParameter("view", _viewMain.GetSemaphoreView()));
+                }
             }
         }
     }
