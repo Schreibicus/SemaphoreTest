@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 using SemaphoreTest.Model;
 using SemaphoreTest.View;
 
@@ -19,7 +16,8 @@ namespace SemaphoreTest.Presenter
         private readonly BindingList<MyTimedThread> _newThreads;
         private readonly BindingList<MyTimedThread> _waitingThreads;
         private readonly BindingList<MyTimedThread> _workingThreads;
-        
+        private readonly BindingList<MyTimedThread> _placeholderThreads;
+
 
         private int _newThreadNumber = 1;
         private const int SemaphoreMaxCapacity = 100;
@@ -36,6 +34,7 @@ namespace SemaphoreTest.Presenter
             _newThreads = new BindingList<MyTimedThread>();
             _waitingThreads = new BindingList<MyTimedThread>();
             _workingThreads = new BindingList<MyTimedThread>();
+            _placeholderThreads = new BindingList<MyTimedThread>();
 
             _view = view;
             _view.SetNewThreadsDataSource(_newThreads);
@@ -120,39 +119,72 @@ namespace SemaphoreTest.Presenter
             //Capacity increase requested - safe to grant
             if (requestedCapacity > _semaphoreCurrentCapacity) {
                 for (int i = 0; i < delta; i++) {
-                    IncrementSemaphoreCapacity();
+                    ReleaseSemaphoreCount();
                 }
+
                 return;
             }
 
             //Capacity decrease requested - may need to stop thread
             for (int i = 0; i < delta; i++) {
                 if (requestedCapacity < _workingThreads.Count) {
-                    StopOldestThread();
+                    RetireOldestThread();
+
                 }
-                DecrementSemaphoreCapacity();
+                else {
+                    GrabSemaphoreCount();
+                }
             }
+
         }
 
-        private void IncrementSemaphoreCapacity()
+
+        /// <summary>
+        /// Releases one semaphore count
+        ///  </summary>
+        /// <remarks>
+        /// When a placeholder thread is present - stops it to release count
+        /// Otherwise releases count from the semaphore's maximum count reserve
+        /// </remarks>
+        private void ReleaseSemaphoreCount()
         {
-            _semaphore.Release();
-            _semaphoreCurrentCapacity++;
+            if (_placeholderThreads.Count < 1) {
+                _semaphore.Release();
+                _semaphoreCurrentCapacity++;
+                return;
+            }
+
+            var placeholder = _placeholderThreads[0];
+            placeholder.IsRunning = false;
+            placeholder.Join();
+            _placeholderThreads.Remove(placeholder);
+           _semaphoreCurrentCapacity++;
         }
 
-        private void DecrementSemaphoreCapacity()
+
+        /// <summary>
+        /// Grabs one semahore count with a placeholder thread
+        /// </summary>
+        private void GrabSemaphoreCount()
         {
-            _semaphore.WaitOne();
+            var placeholder = new MyTimedThread(_semaphore, Guid.NewGuid().ToString());
+            _placeholderThreads.Add(placeholder);
+            placeholder.Start();
             _semaphoreCurrentCapacity--;
         }
 
 
-        private void StopOldestThread()
+        /// <summary>
+        /// Removes MyThread from working list
+        /// and grabs one semahore count with it as a placeholder
+        /// </summary>
+        private void RetireOldestThread()
         {
             var oldestThread = _workingThreads.Max();
             if (oldestThread == null) { return; }
-            oldestThread.IsRunning = false;
-            oldestThread.Join();
+            _placeholderThreads.Add(oldestThread);
+            _workingThreads.Remove(oldestThread);
+            _semaphoreCurrentCapacity--;
         }
 
 

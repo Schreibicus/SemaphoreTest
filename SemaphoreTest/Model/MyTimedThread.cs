@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Security.AccessControl;
 using System.Threading;
 
 namespace SemaphoreTest.Model
@@ -48,13 +47,14 @@ namespace SemaphoreTest.Model
                 ThreadEnteredWorkingArea?.Invoke(Name);
 
                 _workingTime = 0;
-                var timer = new Timer(neverUsed => _workingTime++, null, 0, 1000);
 
-                while (IsRunning) {
-                    DisplayString = $"Thread {Name} --> Running {_workingTime}";
-                    Thread.Sleep(500);             
+                using (new Timer(neverUsed => _workingTime++, null, 0, 1000)) {
+                    while (IsRunning) {
+                        DisplayString = $"Thread {Name} --> Running {_workingTime}";
+                        Thread.Sleep(500);
+                    }
                 }
-                
+                            
             }
             finally {
                 ThreadExitedWorkingArea?.Invoke(Name);
