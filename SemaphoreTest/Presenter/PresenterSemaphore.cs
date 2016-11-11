@@ -28,9 +28,7 @@ namespace SemaphoreTest.Presenter
         public PresenterSemaphore(IViewSemaphore view)
         {
             _semaphore = new Semaphore(_semaphoreCurrentCapacity, SemaphoreMaxCapacity);
-            //_view.SetThreadCounterControlBounds(SemaphoreMinCapacity, SemaphoreMaxCapacity);
-            //_view.SetThreadCounterControlValue(_semaphoreCurrentCapacity);
-
+            
             _newThreads = new BindingList<MyTimedThread>();
             _waitingThreads = new BindingList<MyTimedThread>();
             _workingThreads = new BindingList<MyTimedThread>();
@@ -40,6 +38,8 @@ namespace SemaphoreTest.Presenter
             _view.SetNewThreadsDataSource(_newThreads);
             _view.SetWaitingThreadsDataSource(_waitingThreads);
             _view.SetWorkingThreadsDataSource(_workingThreads);
+            _view.SetThreadCounterControlBounds(SemaphoreMinCapacity, SemaphoreMaxCapacity);
+            _view.SetThreadCounterControlValue(_semaphoreCurrentCapacity);
 
             _view.AddThreadRequested += AddThread;
             _view.ThreadStartRequested += StartThread;
