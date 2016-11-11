@@ -22,6 +22,7 @@ namespace SemaphoreTest.View
         private readonly BindingSource _bsWaitingThreads;
         private readonly BindingSource _bsWorkingThreads;
 
+
         public UctrlSemaphore()
         {
             InitializeComponent();
@@ -48,6 +49,7 @@ namespace SemaphoreTest.View
             lbNewThreads.DataSource = _bsNewThreads;
         }
 
+
         public void SetWaitingThreadsDataSource(BindingList<MyTimedThread> dataSource)
         {
             _bsWaitingThreads.DataSource = dataSource;
@@ -56,12 +58,32 @@ namespace SemaphoreTest.View
             lbWaitingThreads.DataSource = _bsWaitingThreads;
         }
 
+
         public void SetWorkingThreadsDataSource(BindingList<MyTimedThread> dataSource)
         {
             _bsWorkingThreads.DataSource = dataSource;
             lbWorkingThreads.DisplayMember = "DisplayString";
             lbWorkingThreads.ValueMember = "Name";
             lbWorkingThreads.DataSource = _bsWorkingThreads;
+        }
+
+
+        public void SetThreadCounterControlBounds(int min, int max)
+        {
+            numSemaphoreCapacity.Minimum = min;
+            numSemaphoreCapacity.Maximum = max;
+        }
+
+
+        public void SetThreadCounterControlValue(int value)
+        {
+            numSemaphoreCapacity.Value = value;
+        }
+
+
+        public void ShowWarning(string warningMessage)
+        {
+            MessageBox.Show(warningMessage, @"Warning", MessageBoxButtons.OK);
         }
     }
 }

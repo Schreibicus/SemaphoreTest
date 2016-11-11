@@ -19,13 +19,19 @@ namespace SemaphoreTest.Presenter
         private readonly BindingList<MyTimedThread> _newThreads;
         private readonly BindingList<MyTimedThread> _waitingThreads;
         private readonly BindingList<MyTimedThread> _workingThreads;
+        
 
         private int _newThreadNumber = 1;
+        private const int SemaphoreMaxCapacity = 100;
+        private const int SemaphoreMinCapacity = 1;
+        private int _semaphoreCurrentCapacity = 1;
 
 
         public PresenterSemaphore(IViewSemaphore view)
         {
-            _semaphore = new Semaphore(1, 100, "MainSemaphore");
+            _semaphore = new Semaphore(_semaphoreCurrentCapacity, SemaphoreMaxCapacity);
+            //_view.SetThreadCounterControlBounds(SemaphoreMinCapacity, SemaphoreMaxCapacity);
+            //_view.SetThreadCounterControlValue(_semaphoreCurrentCapacity);
 
             _newThreads = new BindingList<MyTimedThread>();
             _waitingThreads = new BindingList<MyTimedThread>();
@@ -47,7 +53,6 @@ namespace SemaphoreTest.Presenter
         {
             MyTimedThread newThread = new MyTimedThread(_semaphore, _newThreadNumber.ToString());
             newThread.ThreadEnteredWorkingArea += OnThreadEnteredWorkingArea;
-
             newThread.ThreadExitedWorkingArea += OnThreadExitedWorkingArea;
 
             _newThreads.Add(newThread);
@@ -90,13 +95,66 @@ namespace SemaphoreTest.Presenter
             var selectedThread = _workingThreads.FirstOrDefault(thrd => thrd.Name == name);
             if (selectedThread == null) { return; }
             selectedThread.IsRunning = false;
+            selectedThread.Join();
         }
 
 
         private void ChangeSemaphoreCapcity(int requestedCapacity)
         {
-            
+            //Capacity above maximum requested - reject
+            if (requestedCapacity > SemaphoreMaxCapacity) {
+                _view.ShowWarning($"Can't exceed Semaphore maximum capacity of {SemaphoreMaxCapacity}!");
+                _view.SetThreadCounterControlValue(SemaphoreMaxCapacity);
+                return;
+            }
+
+            //Capacity below minimum requested - reject
+            if (requestedCapacity < SemaphoreMinCapacity) {
+                _view.ShowWarning($"Semaphore capacity can't be lower than 1!");
+                _view.SetThreadCounterControlValue(SemaphoreMinCapacity);
+                return;
+            }
+
+            int delta = Math.Abs(requestedCapacity - _semaphoreCurrentCapacity);
+
+            //Capacity increase requested - safe to grant
+            if (requestedCapacity > _semaphoreCurrentCapacity) {
+                for (int i = 0; i < delta; i++) {
+                    IncrementSemaphoreCapacity();
+                }
+                return;
+            }
+
+            //Capacity decrease requested - may need to stop thread
+            for (int i = 0; i < delta; i++) {
+                if (requestedCapacity < _workingThreads.Count) {
+                    StopOldestThread();
+                }
+                DecrementSemaphoreCapacity();
+            }
         }
+
+        private void IncrementSemaphoreCapacity()
+        {
+            _semaphore.Release();
+            _semaphoreCurrentCapacity++;
+        }
+
+        private void DecrementSemaphoreCapacity()
+        {
+            _semaphore.WaitOne();
+            _semaphoreCurrentCapacity--;
+        }
+
+
+        private void StopOldestThread()
+        {
+            var oldestThread = _workingThreads.Max();
+            if (oldestThread == null) { return; }
+            oldestThread.IsRunning = false;
+            oldestThread.Join();
+        }
+
 
         public void ShowView() { _view.Show(); }
         public void HideView() { _view.Hide(); }

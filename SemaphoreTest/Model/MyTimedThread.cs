@@ -4,23 +4,24 @@ using System.Threading;
 
 namespace SemaphoreTest.Model
 {
-    public class MyTimedThread : BindableBase
+    public class MyTimedThread : BindableBase, IComparable<MyTimedThread>
     {
         private readonly Semaphore _semaphore;
         private readonly Thread _thread;
         
+        public string Name { get { return _thread.Name; } }
+        public bool IsRunning { get; set; }
+        public event Action<string> ThreadEnteredWorkingArea;
+        public event Action<string> ThreadExitedWorkingArea;
+
+        private int _workingTime;
+
         private string _displayString;
         public string DisplayString
         {
             get { return _displayString; }
             set { SetProperty(ref _displayString, value); }
         }
-
-        public string Name { get { return _thread.Name; } }
-        public bool IsRunning { get; set; }
-        public event Action<string> ThreadEnteredWorkingArea;
-        public event Action<string> ThreadExitedWorkingArea;
-
 
 
         public MyTimedThread(Semaphore semaphore, string name)
@@ -30,6 +31,7 @@ namespace SemaphoreTest.Model
             IsRunning = false;
             DisplayString = $"Thread {name} --> New";
         }
+
 
         public void Start()
         {
@@ -45,11 +47,11 @@ namespace SemaphoreTest.Model
                 _semaphore.WaitOne();
                 ThreadEnteredWorkingArea?.Invoke(Name);
 
-                int workingTime = 0;
-                var timer = new Timer(neverUsed => workingTime++, null, 0, 1000);
+                _workingTime = 0;
+                var timer = new Timer(neverUsed => _workingTime++, null, 0, 1000);
 
                 while (IsRunning) {
-                    DisplayString = $"Thread {Name} --> Running {workingTime}";
+                    DisplayString = $"Thread {Name} --> Running {_workingTime}";
                     Thread.Sleep(500);             
                 }
                 
@@ -60,6 +62,18 @@ namespace SemaphoreTest.Model
             }                  
         }
 
-        
+
+        public void Join()
+        {
+            _thread.Join();
+        }
+
+
+        public int CompareTo(MyTimedThread other)
+        {
+            if (other == null) { return 1; }
+
+            return _workingTime.CompareTo(other._workingTime);
+        }
     }
 }
